@@ -7,6 +7,7 @@ matlabGitBisect -- a git bisect run script for Matlab projects
 '''
 
 import sys
+import signal
 import os
 import subprocess
 
@@ -53,6 +54,8 @@ def main(argv=None): # IGNORE:C0111
 USAGE
 ''' % (program_shortdesc, str(__date__))
 
+    buildSubProcess = None
+    testSubProcess = None
     try:
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
@@ -73,17 +76,24 @@ USAGE
         # Build
         if args.buildCode is not None:
             try:
-                (subprocess.Popen(args.buildCode.split(), shell=True, cwd=args.buildDir)).wait()
+                print "Building..."
+                buildSubProcess = subprocess.Popen(args.buildCode.split(), shell=True, cwd=args.buildDir, preexec_fn=os.setsid)
+                buildSubProcess.wait()
+                print "Build done."
             except CalledProcessError:
                 return buildErrorReturnCode
+        buildSubProcess = None
         
         # Run test
         resultsFileName = os.path.join(os.getcwd(), "results.txt")
         logFileName = os.path.join(os.getcwd(), "matlabGitBisectLog.txt")
         matlabFileDirectory = os.path.dirname(os.path.realpath(__file__))
-        matlabCall = ["matlab", "-logfile", logFileName, "-nojvm", "-nosplash", "-r", "runTest(\'" + resultsFileName + "\', \'" + args.testCode +"\')"]
-        print matlabCall
-        (subprocess.Popen(matlabCall, cwd=matlabFileDirectory)).wait()
+        matlabCall = ["matlab", "-logfile", logFileName, "-nodesktop", "-nosplash", "-r", "runTest(\'" + resultsFileName + "\', \'" + args.testCode +"\')"]
+        print "Running test..."
+        testSubProcess = subprocess.Popen(matlabCall, cwd=matlabFileDirectory, stdin=subprocess.PIPE)
+        testSubProcess.wait()
+        print "Test done."
+        testSubProcess = None
         crashed = not os.path.isfile(resultsFileName)
         
         # Process test results
@@ -98,7 +108,15 @@ USAGE
         
 
     except KeyboardInterrupt:
-        ### handle keyboard interrupt ###
+        # Handle keyboard interrupt
+        print "Keyboard interrupt detected"
+        if buildSubProcess is not None:
+            print "Killing build subprocess.."
+            os.killpg(buildSubProcess.pid, signal.SIGTERM) 
+        if testSubProcess is not None:
+            print "Killing test subprocess."
+            testSubProcess.kill()
+            testSubProcess.communicate()
         return 2
 
 if __name__ == "__main__":
