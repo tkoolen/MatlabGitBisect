@@ -53,9 +53,12 @@ def main(argv=None): # IGNORE:C0111
 USAGE
 ''' % (program_shortdesc, str(__date__))
 
+    skipReturnCode = 125
+    abortBisectReturnCode = 255
+    
     buildSubProcess = None
     testSubProcess = None
-    try:
+    try:        
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-bc", "--build-code", dest="buildCode", help="code to build before running", default=None)
@@ -68,7 +71,6 @@ USAGE
         args = parser.parse_args()
         
         # Set up return codes 
-        skipReturnCode = 125
         buildErrorReturnCode = {'bad': 3, 'skip': skipReturnCode}[args.buildErrorBehavior]
         crashedReturnCode = {'bad': 4, 'skip': skipReturnCode}[args.crashBehavior]
         
@@ -116,7 +118,7 @@ USAGE
             print "Killing test subprocess."
             testSubProcess.kill()
             testSubProcess.communicate()
-        return 2
+        return abortBisectReturnCode
 
 if __name__ == "__main__":
     sys.exit(main())
