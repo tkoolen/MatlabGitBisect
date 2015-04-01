@@ -60,7 +60,7 @@ USAGE
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-bc", "--build-code", dest="buildCode", help="code to build before running", default=None)
-        parser.add_argument("-bd", "--build-dir", dest="buildDir", help="buidl directory", default=os.getcwd())
+        parser.add_argument("-bd", "--build-dir", dest="buildDir", help="build directory", default=os.getcwd())
         parser.add_argument("-t", "--test-code", dest="testCode", help="test code to run", default="")
         parser.add_argument("-be", "--build-error-behavior", dest="buildErrorBehavior", default="bad", choices=['bad', 'skip'], help="behavior when a build error is detected.")
         parser.add_argument("-c", "--crash-behavior", dest="crashBehavior", default="bad", choices=['bad', 'skip'], help="behavior when a crash is detected")
