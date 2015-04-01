@@ -13,7 +13,6 @@ import subprocess
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
-from matplotlib.compat.subprocess import CalledProcessError
 
 __all__ = []
 __version__ = 0.1
@@ -75,14 +74,16 @@ USAGE
         
         # Build
         if args.buildCode is not None:
-            try:
-                print "Building..."
-                buildSubProcess = subprocess.Popen(args.buildCode.split(), shell=True, cwd=args.buildDir, preexec_fn=os.setsid)
-                buildSubProcess.wait()
-                print "Build done."
-            except CalledProcessError:
+            print "Building..."
+            buildSubProcess = subprocess.Popen(args.buildCode.split(), shell=True, cwd=args.buildDir, preexec_fn=os.setsid)
+            buildSubProcess.wait()
+            buildSubProcessReturnCode = buildSubProcess.returncode
+            buildSubProcess = None
+            if buildSubProcessReturnCode is not 0:
+                print "Build failed"
                 return buildErrorReturnCode
-        buildSubProcess = None
+            else:
+                print "Build done."
         
         # Run test
         resultsFileName = os.path.join(os.getcwd(), "results.txt")
@@ -105,13 +106,11 @@ USAGE
                 testReturnCode = f.read()
             os.remove(resultsFileName)
             return testReturnCode
-        
 
-    except KeyboardInterrupt:
-        # Handle keyboard interrupt
-        print "Keyboard interrupt detected"
+    except:
+        print "Exiting matlabGitBisect."
         if buildSubProcess is not None:
-            print "Killing build subprocess.."
+            print "Killing build subprocess."
             os.killpg(buildSubProcess.pid, signal.SIGTERM) 
         if testSubProcess is not None:
             print "Killing test subprocess."
