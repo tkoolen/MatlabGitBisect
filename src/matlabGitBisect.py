@@ -45,7 +45,7 @@ def main(argv=None): # IGNORE:C0111
   Created by Twan Koolen on %s.
   Copyright 2015. All rights reserved.
 
-  Licensed under TODO
+  Licensed under MIT License
 
   Distributed on an "AS IS" basis without warranties
   or conditions of any kind, either express or implied.
