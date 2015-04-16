@@ -6,7 +6,7 @@ matlabGitBisect -- a git bisect run script for Matlab projects
   Created by Twan Koolen on 2015-03-31.
   Copyright 2015. All rights reserved.
 
-  Licensed under TODO
+  Licensed under MIT License
 
   Distributed on an "AS IS" basis without warranties
   or conditions of any kind, either express or implied.
