@@ -25,6 +25,13 @@ optional arguments:
                         behavior when a build error is detected.
   -c {bad,skip}, --crash-behavior {bad,skip}
                         behavior when a crash is detected
-Exiting matlabGitBisect.
+```
+
+Example usage to find where `testThisAndThat` started causing Matlab crashes, skipping revisions that resulted in build errors:
+```
+git bisect start
+git bisect bad
+git bisect good 9dea818feee7673084457356dfd034ad2f1a1e75
+git bisect run ~/code/MatlabGitBisect/src/matlabGitBisect.py -bc "make -j" -bd .. -t "cd ~/code/MyProject;testThisAndThat;" -be skip -c bad
 
 ```
